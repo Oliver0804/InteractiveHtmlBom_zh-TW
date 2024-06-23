@@ -8,6 +8,8 @@
 ![](./pic/1.png)
 ![](./pic/2.png)
 ![](./pic/3.png)
+![](./pic/4.png)
+
 
 This plugin generates a convenient Bill of Materials (BOM) listing with the
 ability to visually correlate and easily search for components and their placements
