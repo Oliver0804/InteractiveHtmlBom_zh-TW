@@ -11,18 +11,6 @@ from ..core.config import Config
 from ..core.fontparser import FontParser
 
 
-KICAD_VERSION = [5, 1, 0]
-
-if hasattr(pcbnew, 'Version'):
-    version = pcbnew.Version().split('.')
-    try:
-        for i in range(len(version)):
-            version[i] = int(version[i].split('-')[0])
-    except ValueError:
-        pass
-    KICAD_VERSION = version
-
-
 class PcbnewParser(EcadParser):
 
     def __init__(self, file_name, config, logger, board=None):
@@ -31,9 +19,9 @@ class PcbnewParser(EcadParser):
         if self.board is None:
             self.board = pcbnew.LoadBoard(self.file_name)  # type: pcbnew.BOARD
         if hasattr(self.board, 'GetModules'):
-            self.footprints = list(self.board.GetModules())  # type: list[pcbnew.MODULE]
+            self.footprints = list(self.board.GetModules())
         else:
-            self.footprints = list(self.board.GetFootprints())  # type: list[pcbnew.FOOTPRINT]
+            self.footprints = list(self.board.GetFootprints())
         self.font_parser = FontParser()
 
     def get_extra_field_data(self, file_name):
@@ -121,7 +109,7 @@ class PcbnewParser(EcadParser):
         return round(a1, 2), round(a2, 2)
 
     def parse_shape(self, d):
-        # type: (pcbnew.PCB_SHAPE) -> dict | None
+        # type: (pcbnew.PCB_SHAPE) -> dict or None
         shape = {
             pcbnew.S_SEGMENT: "segment",
             pcbnew.S_CIRCLE: "circle",
@@ -201,7 +189,7 @@ class PcbnewParser(EcadParser):
                 parent_footprint = d.GetParentModule()
             else:
                 parent_footprint = d.GetParentFootprint()
-            if parent_footprint is not None and KICAD_VERSION[0] < 8:
+            if parent_footprint is not None:
                 angle = self.normalize_angle(parent_footprint.GetOrientation())
             shape_dict = {
                 "type": shape,
@@ -425,17 +413,10 @@ class PcbnewParser(EcadParser):
             drawings.append(("val", f.Value()))
             for d in f.GraphicalItems():
                 drawings.append((d.GetClass(), d))
-            if hasattr(f, "GetFields"):
-                fields = f.GetFields() # type: list[pcbnew.PCB_FIELD]
-                for field in fields:
-                    if field.IsReference() or field.IsValue():
-                        continue
-                    drawings.append((field.GetClass(), field))
-
         return drawings
 
     def parse_pad(self, pad):
-        # type: (pcbnew.PAD) -> dict | None
+        # type: (pcbnew.PAD) -> dict or None
         layers_set = list(pad.GetLayerSet().Seq())
         layers = []
         if pcbnew.F_Cu in layers_set:
@@ -516,7 +497,7 @@ class PcbnewParser(EcadParser):
     def parse_footprints(self):
         # type: () -> list
         footprints = []
-        for f in self.footprints:
+        for f in self.footprints:  # type: pcbnew.FOOTPRINT
             ref = f.GetReference()
 
             # bounding box
@@ -638,9 +619,8 @@ class PcbnewParser(EcadParser):
         }
 
     def parse_zones(self, zones):
-        # type: (list[pcbnew.ZONE]) -> dict
         result = {pcbnew.F_Cu: [], pcbnew.B_Cu: []}
-        for zone in zones:
+        for zone in zones:  # type: pcbnew.ZONE
             if (not zone.IsFilled() or
                     hasattr(zone, 'GetIsKeepout') and zone.GetIsKeepout() or
                     hasattr(zone, 'GetIsRuleArea') and zone.GetIsRuleArea()):
@@ -830,7 +810,7 @@ class InteractiveHtmlBomPlugin(pcbnew.ActionPlugin, object):
 
     def __init__(self):
         super(InteractiveHtmlBomPlugin, self).__init__()
-        self.name = "Generate Interactive HTML BOM"
+        self.name = "生成互動式 HTML BOM"
         self.category = "Read PCB"
         self.pcbnew_icon_support = hasattr(self, "show_toolbar_button")
         self.show_toolbar_button = True

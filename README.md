@@ -3,6 +3,12 @@
 
 ![icon](https://i.imgur.com/js4kDOn.png)
 
+# 將介面完成中文化
+
+![](./pic/1.png)
+![](./pic/2.png)
+![](./pic/3.png)
+
 This plugin generates a convenient Bill of Materials (BOM) listing with the
 ability to visually correlate and easily search for components and their placements
 on the PCB. It is particularly useful when hand-soldering a prototype, as it allows

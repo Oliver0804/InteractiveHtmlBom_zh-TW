@@ -3,7 +3,7 @@ import os
 import subprocess
 
 
-LAST_TAG = 'v2.9.0'
+LAST_TAG = 'v2.9.0 zh-tw'
 
 
 def _get_git_version():

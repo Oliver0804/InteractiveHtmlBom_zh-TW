@@ -38,7 +38,7 @@ def check_for_bom_button():
             top_tb.AddSeparator()
             button_wx_item_id = wx.NewId()
             top_tb.AddTool(button_wx_item_id, "iBOM", bm,
-                           "Generate interactive BOM", wx.ITEM_NORMAL)
+                           "生成互動式 BOM", wx.ITEM_NORMAL)
             top_tb.Bind(wx.EVT_TOOL, callback, id=button_wx_item_id)
             top_tb.Realize()
 

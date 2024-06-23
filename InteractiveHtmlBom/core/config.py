@@ -1,4 +1,4 @@
-"""Config object"""
+"""配置物件"""
 
 import argparse
 import os
@@ -11,37 +11,37 @@ from .. import dialog
 
 class Config:
     FILE_NAME_FORMAT_HINT = (
-        'Output file name format supports substitutions:\n'
+        '輸出檔案名稱格式支持替換:\n'
         '\n'
-        '    %f : original pcb file name without extension.\n'
-        '    %p : pcb/project title from pcb metadata.\n'
-        '    %c : company from pcb metadata.\n'
-        '    %r : revision from pcb metadata.\n'
-        '    %d : pcb date from metadata if available, '
-        'file modification date otherwise.\n'
-        '    %D : bom generation date.\n'
-        '    %T : bom generation time.\n'
+        '    %f : 原始PCB檔案名稱不含副檔名。\n'
+        '    %p : PCB/專案標題來自PCB元數據。\n'
+        '    %c : 公司名稱來自PCB元數據。\n'
+        '    %r : 修訂版本來自PCB元數據。\n'
+        '    %d : PCB日期來自元數據（如果有），'
+        '否則為檔案修改日期。\n'
+        '    %D : BOM生成日期。\n'
+        '    %T : BOM生成時間。\n'
         '\n'
-        'Extension .html will be added automatically.'
+        '副檔名 .html 會自動添加。'
     )  # type: str
 
     # Helper constants
-    bom_view_choices = ['bom-only', 'left-right', 'top-bottom']
+    bom_view_choices = ['僅BOM', '左右', '上下']
     layer_view_choices = ['F', 'FB', 'B']
     default_sort_order = [
         'C', 'R', 'L', 'D', 'U', 'Y', 'X', 'F', 'SW', 'A',
         '~',
         'HS', 'CNN', 'J', 'P', 'NT', 'MH',
     ]
-    highlight_pin1_choices = ['none', 'all', 'selected']
-    default_checkboxes = ['Sourced', 'Placed']
+    highlight_pin1_choices = ['無', '全部', '選中的']
+    default_checkboxes = ['已採購', '已放置']
     html_config_fields = [
         'dark_mode', 'show_pads', 'show_fabrication', 'show_silkscreen',
         'highlight_pin1', 'redraw_on_drag', 'board_rotation', 'checkboxes',
         'bom_view', 'layer_view', 'offset_back_rotation',
         'kicad_text_formatting'
     ]
-    default_show_group_fields = ["Value", "Footprint"]
+    default_show_group_fields = ["數值", "封裝"]
 
     # Defaults
 
@@ -161,13 +161,13 @@ class Config:
 
         # migration from previous settings
         if self.highlight_pin1 == '0':
-            self.highlight_pin1 = 'none'
+            self.highlight_pin1 = '無'
         if self.highlight_pin1 == '1':
-            self.highlight_pin1 = 'all'
+            self.highlight_pin1 = '全部'
 
     def save(self, locally):
         file = self.local_config_file if locally else self.global_config_file
-        print('Saving to', file)
+        print('儲存至', file)
         f = FileConfig(localFilename=file)
 
         f.SetPath('/html_defaults')
@@ -326,111 +326,107 @@ class Config:
     def add_options(cls, parser, version):
         # type: (argparse.ArgumentParser, str) -> None
         parser.add_argument('--show-dialog', action='store_true',
-                            help='Shows config dialog. All other flags '
-                                 'will be ignored.')
+                            help='顯示配置對話框。所有其他標誌'
+                                 '將被忽略。')
         parser.add_argument('--version', action='version', version=version)
         # Html
-        parser.add_argument('--dark-mode', help='Default to dark mode.',
+        parser.add_argument('--dark-mode', help='預設為暗模式。',
                             action='store_true')
         parser.add_argument('--hide-pads',
-                            help='Hide footprint pads by default.',
+                            help='預設隱藏封裝的 pads。',
                             action='store_true')
         parser.add_argument('--show-fabrication',
-                            help='Show fabrication layer by default.',
+                            help='預設顯示製造層。',
                             action='store_true')
         parser.add_argument('--hide-silkscreen',
-                            help='Hide silkscreen by default.',
+                            help='預設隱藏絲印層。',
                             action='store_true')
         parser.add_argument('--highlight-pin1',
                             default=cls.highlight_pin1_choices[0],
                             const=cls.highlight_pin1_choices[1],
                             choices=cls.highlight_pin1_choices,
                             nargs='?',
-                            help='Highlight first pin.')
+                            help='突出顯示第一個引腳。')
         parser.add_argument('--no-redraw-on-drag',
-                            help='Do not redraw pcb on drag by default.',
+                            help='預設不在拖動時重新繪製PCB。',
                             action='store_true')
         parser.add_argument('--board-rotation', type=int,
                             default=cls.board_rotation * 5,
-                            help='Board rotation in degrees (-180 to 180). '
-                                 'Will be rounded to multiple of 5.')
+                            help='板旋轉角度（-180 到 180）。 '
+                                 '將四捨五入到5的倍數。')
         parser.add_argument('--offset-back-rotation',
-                            help='Offset the back of the pcb by 180 degrees',
+                            help='將PCB背面偏移180度',
                             action='store_true')
         parser.add_argument('--checkboxes',
                             default=cls.checkboxes,
-                            help='Comma separated list of checkbox columns.')
+                            help='以逗號分隔的復選框列清單。')
         parser.add_argument('--bom-view', default=cls.bom_view,
                             choices=cls.bom_view_choices,
-                            help='Default BOM view.')
+                            help='預設 BOM 視圖。')
         parser.add_argument('--layer-view', default=cls.layer_view,
                             choices=cls.layer_view_choices,
-                            help='Default layer view.')
+                            help='預設層視圖。')
         parser.add_argument('--no-compression',
-                            help='Disable compression of pcb data.',
+                            help='禁用 PCB 數據壓縮。',
                             action='store_true')
-        parser.add_argument('--no-browser', help='Do not launch browser.',
+        parser.add_argument('--no-browser', help='不啟動瀏覽器。',
                             action='store_true')
 
         # General
         parser.add_argument('--dest-dir', default=cls.bom_dest_dir,
-                            help='Destination directory for bom file '
-                                 'relative to pcb file directory.')
+                            help='BOM 檔案的目標目錄 '
+                                 '相對於PCB檔案目錄。')
         parser.add_argument('--name-format', default=cls.bom_name_format,
                             help=cls.FILE_NAME_FORMAT_HINT.replace('%', '%%'))
         parser.add_argument('--include-tracks', action='store_true',
-                            help='Include track/zone information in output. '
-                                 'F.Cu and B.Cu layers only.')
+                            help='在輸出中包括軌跡/區域信息。 '
+                                 '僅 F.Cu 和 B.Cu 層。')
         parser.add_argument('--include-nets', action='store_true',
-                            help='Include netlist information in output.')
+                            help='在輸出中包括網表信息。')
         parser.add_argument('--sort-order',
-                            help='Default sort order for components. '
-                                 'Must contain "~" once.',
+                            help='元件的預設排序順序。 '
+                                 '必須包含一次 "~"。',
                             default=','.join(cls.component_sort_order))
         parser.add_argument('--blacklist',
                             default=','.join(cls.component_blacklist),
-                            help='List of comma separated blacklisted '
-                                 'components or prefixes with *. '
-                                 'E.g. "X1,MH*"')
+                            help='列出用逗號分隔的黑名單元件 '
+                                 '或帶有 * 的前綴。 '
+                                 '例如 "X1,MH*"')
         parser.add_argument('--no-blacklist-virtual', action='store_true',
-                            help='Do not blacklist virtual components.')
+                            help='不要將虛擬元件列入黑名單。')
         parser.add_argument('--blacklist-empty-val', action='store_true',
-                            help='Blacklist components with empty value.')
+                            help='將數值為空的元件列入黑名單。')
 
         # Fields section
         parser.add_argument('--netlist-file',
-                            help='(Deprecated) Path to netlist or xml file.')
+                            help='（已棄用）網表或XML檔案的路徑。')
         parser.add_argument('--extra-data-file',
-                            help='Path to netlist or xml file.')
+                            help='網表或XML檔案的路徑。')
         parser.add_argument('--extra-fields',
-                            help='Passing --extra-fields "X,Y" is a shortcut '
-                                 'for --show-fields and --group-fields '
-                                 'with values "Value,Footprint,X,Y"')
+                            help='傳遞 --extra-fields "X,Y" 是快捷方式 '
+                                 '對 --show-fields 和 --group-fields '
+                                 '使用 "Value,Footprint,X,Y" 值。')
         parser.add_argument('--show-fields',
                             default=cls._join(cls.show_fields),
-                            help='List of fields to show in the BOM.')
+                            help='BOM 中顯示的字段列表。')
         parser.add_argument('--group-fields',
                             default=cls._join(cls.group_fields),
-                            help='Fields that components will be grouped by.')
+                            help='元件將根據這些字段分組。')
         parser.add_argument('--normalize-field-case',
-                            help='Normalize extra field name case. E.g. "MPN" '
-                                 ', "mpn" will be considered the same field.',
+                            help='標準化額外字段名稱的大小寫。例如 "MPN" '
+                                 '和 "mpn" 將被視為相同的字段。',
                             action='store_true')
         parser.add_argument('--variant-field',
-                            help='Name of the extra field that stores board '
-                                 'variant for component.')
+                            help='存儲元件板變體的額外字段的名稱。')
         parser.add_argument('--variants-whitelist', default='',
-                            help='List of board variants to '
-                                 'include in the BOM. Use "<empty>" to denote '
-                                 'not set or empty value.')
+                            help='包括在 BOM 中的板變體清單。使用 "<empty>" 表示 '
+                                 '未設置或空值。')
         parser.add_argument('--variants-blacklist', default='',
-                            help='List of board variants to '
-                                 'exclude from the BOM. Use "<empty>" to denote '
-                                 'not set or empty value.')
+                            help='排除在 BOM 中的板變體清單。使用 "<empty>" 表示 '
+                                 '未設置或空值。')
         parser.add_argument('--dnp-field', default=cls.dnp_field,
-                            help='Name of the extra field that indicates '
-                                 'do not populate status. Components with '
-                                 'this field not empty will be excluded.')
+                            help='表示不要填充狀態的額外字段名稱。具有 '
+                                 '此字段不為空的元件將被排除。')
 
     def set_from_args(self, args):
         # type: (argparse.Namespace) -> None

@@ -224,7 +224,7 @@ def open_file(filename):
         elif sys.platform.startswith('linux'):
             subprocess.call(('xdg-open', filename))
     except Exception as e:
-        log.warn('Failed to open browser: {}'.format(e))
+        log.warn('無法開啟瀏覽器: {}'.format(e))
 
 
 def process_substitutions(bom_name_format, pcb_file_name, metadata):
@@ -260,7 +260,7 @@ def get_pcbdata_javascript(pcbdata, compression):
     pcbdata_str = json.dumps(round_floats(pcbdata, 6))
 
     if compression:
-        log.info("Compressing pcb data")
+        log.info("壓縮 PCB 數據")
         pcbdata_str = json.dumps(LZString().compress_to_base64(pcbdata_str))
         js = "var pcbdata = JSON.parse(LZString.decompressFromBase64({}))"
 
@@ -313,7 +313,7 @@ def generate_file(pcb_file_dir, pcb_file_name, pcbdata, config):
     with io.open(bom_file_name, 'wt', encoding='utf-8') as bom:
         bom.write(html)
 
-    log.info("Created file %s", bom_file_name)
+    log.info("已建立檔案 %s", bom_file_name)
     return bom_file_name
 
 
@@ -326,7 +326,7 @@ def main(parser, config, logger):
 
     pcbdata, components = parser.parse()
     if not pcbdata and not components:
-        raise ParsingException('Parsing failed.')
+        raise ParsingException('解析失敗。')
 
     pcbdata["bom"] = generate_bom(components, config)
     pcbdata["ibom_version"] = config.version
@@ -335,7 +335,7 @@ def main(parser, config, logger):
     bom_file = generate_file(pcb_file_dir, pcb_file_name, pcbdata, config)
 
     if config.open_browser:
-        logger.info("Opening file in browser")
+        logger.info("在瀏覽器中開啟檔案")
         open_file(bom_file)
 
 
